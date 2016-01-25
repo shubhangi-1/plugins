@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#The plugin checks the system for process crashes and reports the same
+
 mapfile -t lines < <(ls -l  /var/crash/ | awk 'NR>1 {print $NF}')
 C=0
 W=0
