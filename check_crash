@@ -2,12 +2,13 @@
 
 #The plugin checks the system for process crashes and reports the same
 
-mapfile -t lines < <(ls -l  /var/crash/ | awk 'NR>1 {print $NF}')
+#mapfile -t lines < <(ls -l  /var/crash/ | awk 'NR>1 {print $NF}')
+mapfile -t lines < <(ls -1  /var/crash/ | grep '.crash')
 C=0
 W=0
 for (( i=0; i<${#lines[@]}; i++ ))
 do 
-	process=$(cat /var/crash/${lines[i]} | grep ExecutablePath | awk -F '/' '{print $NF}')	
+	process=$(sudo cat /var/crash/${lines[i]} | grep ExecutablePath | awk -F '/' '{print $NF}')	
         time=$(ls -l  /var/crash/ | grep ${lines[i]} | awk '{print $6,$7,$8}') 
 	count=$(ps -eaf | grep $process | wc -l)
 	if [ $count -eq 1 ]; then
