@@ -2,7 +2,6 @@
 
 #The plugin checks the system for process crashes and reports the same
 
-#mapfile -t lines < <(ls -l  /var/crash/ | awk 'NR>1 {print $NF}')
 mapfile -t lines < <(ls -1  /var/crash/ | grep '.crash')
 C=0
 W=0

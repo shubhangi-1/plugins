@@ -1,0 +1,65 @@
+#! /usr/bin/env bash
+
+#The following plugin checks and reports the load average of the system. The warning and critical thresholds are accepted as percentage values.
+
+usage() { echo "Usage: $0 -c Critical -w Warning" 1>&2; exit 1; }
+
+while getopts ":c:w:" o; do
+    case "${o}" in
+        c)
+            c=${OPTARG}
+            ;;
+        w)
+            w=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+if [ -z "${c}" ] || [ -z "${w}" ]; then
+    usage
+fi
+
+
+cpu=$(lscpu|grep CPU\(s\)|head -1|awk -F ':' '{print $2}')
+
+#Half of w1/w
+w15=$((w*cpu))
+w15=$(echo "scale=3; $w15/200" | bc -l)
+
+w1=$((w*cpu))
+w1=$(echo "scale=3; $w1/100" | bc -l)
+
+#Mean of w1 and w15
+w5=$(echo $w1 + $w15| bc)
+w5=$(echo "scale=3; $w5/2" | bc -l)
+
+c15=$w1
+
+c1=$((c*cpu))
+c1=$(echo "scale=3; $c1/100" | bc -l)
+
+#Mean of c1 and c15
+c5=$(echo $c1 + $c15| bc)
+c5=$(echo "scale=3; $c5/2" | bc -l)
+
+load=$(uptime|awk -F ':' '{print $NF}')
+IFS=',' read -ra addr <<< "$load"
+
+#Load average for last 1,5 and 15 mins respectively
+d1=${addr[0]}
+d5=${addr[1]}
+d15=${addr[2]}
+
+echo "Load Average: $d1,$d5,$d15 (1,5,15 mins)"
+echo "Warning Limit: $w1,$w5,$w15"
+echo "Critical Limit: $c1,$c5,$c15"
+
+#Reports critical/warning if either of the values get exceed (d1,d5,d15)
+if [ $(echo "$d1 > $c1" | bc) -ne 0 ] || [ $(echo "$d5 > $c5" | bc) -ne 0 ] || [ $(echo "$d15 > $c15" | bc) -ne 0  ]; then
+	exit 2
+elif [ $(echo "$d1 > $w1" | bc) -ne 0 ] || [ $(echo "$d5 > $w5" | bc) -ne 0 ] || [ $(echo "$d15 > $w15" | bc) -ne 0 ]; then
+	exit 1
+fi  
