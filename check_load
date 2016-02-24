@@ -2,7 +2,7 @@
 
 #The following plugin checks and reports the load average of the system. The warning and critical thresholds are accepted as percentage values.
 
-usage() { echo "Usage: $0 -c Critical -w Warning" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -c Critical -w Warning (% values, w<c)" 1>&2; exit 1; }
 
 while getopts ":c:w:" o; do
     case "${o}" in
@@ -17,12 +17,13 @@ while getopts ":c:w:" o; do
             ;;
     esac
 done
-
-if [ -z "${c}" ] || [ -z "${w}" ]; then
+#! [[ "$w" =~ ^[0-9]+$ ]] 
+if [ -z "${c}" ] || [ -z "${w}" ] || [ $(echo "$w > $c" | bc) -ne 0 ]; then
     usage
 fi
 
-
+w=${w%.*}
+c=${c%.*}
 cpu=$(lscpu|grep CPU\(s\)|head -1|awk -F ':' '{print $2}')
 
 #Half of w1/w
