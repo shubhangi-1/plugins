@@ -7,8 +7,8 @@ from __future__ import division
 import argparse, sys
 import subprocess
 
-def get_bytes(b, i):
-    command = "cat /sys/class/net/%s/statistics/%s" % (i, b)
+def get_bytes(byte, interface):
+    command = "cat /sys/class/net/%s/statistics/%s" % (interface, byte)
     res_bytes = int(run_command(command)) 
     return res_bytes
 
@@ -30,11 +30,11 @@ def result(p):
         return "%s bps" % p['bps']
                 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument("-c", required=True, type=float, help="Critical value")
     parser.add_argument("-w", required=True, type=float, help="Warning value")
     parser.add_argument("-i", required=True, help="Interface Name")
-    args=parser.parse_args()
+    args = parser.parse_args()
     critical_limit, warning_limit, interface = args.c, args.w, args.i
     
     interval = 1
@@ -51,15 +51,14 @@ if __name__=='__main__':
     tx['bps'] = tx.get('bits2') - tx.get('bits1')  
     rx['bps'] = rx.get('bits2') - rx.get('bits1')  
 
-    #"{0:.2f}".format(13.949999999999999)
     tx['kbps'], rx['kbps'] = tx['bps']/10**3, rx['bps']/10**3
     tx['mbps'], rx['mbps'] = tx['bps']/10**6, rx['bps']/10**6
     tx['gbps'], rx['gbps'] = tx['bps']/10**9, rx['bps']/10**9
 
     output = "TX- %s, RX- %s\n" % (result(tx), result(rx))
-    output += "Crit Val- %sGbps, Warn Val- %sGbps\n" % (args.c, args.w)
+    output += "Crit- %sGbps, Warn- %sGbps\n" % (args.c, args.w)
     
-    perfdata = "tx_speed=%s;;;; rx_speed=%s;;;;" % (tx['bps'], rx['bps'])
+    perfdata = "tx_speed=%s;;;; rx_speed=%s;;;; tx_bytes=%s;;;; rx_bytes=%s;;;;" % (tx['bps'], rx['bps'], tx['bits2'], rx['bits2'])
     
     print output + " | " + perfdata
     
