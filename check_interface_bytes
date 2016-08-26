@@ -17,7 +17,8 @@ def run_command(command):
     output, error = r.communicate()
     if output:
         return output
-    return error
+    print error
+    sys.exit(4)
 
 def result(p):
     if int(p['gbps']) > 0:
