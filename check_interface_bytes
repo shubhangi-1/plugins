@@ -45,7 +45,7 @@ if __name__=='__main__':
     rx['bits1'] = get_bytes('rx_bytes', interface)*8
     tx['bits1'] = get_bytes('tx_bytes', interface)*8
     sleep_command = "sleep %s" % interval
-    run_command(sleep_command)
+    subprocess.check_output(sleep_command, shell=True)
     rx['bits2'] = get_bytes('rx_bytes', interface)*8
     tx['bits2'] = get_bytes('tx_bytes', interface)*8
 
