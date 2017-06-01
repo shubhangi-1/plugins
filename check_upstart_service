@@ -1,6 +1,6 @@
 #
 # Plugin to check the status of a service, using
-# 'service <service> status' command
+# 'service <service_name> status' command
 #
 
 #!/bin/bash
