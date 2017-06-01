@@ -1,9 +1,10 @@
+#!/bin/bash
+
 #
 # Plugin to check the status of a service, using
 # 'service <service_name> status' command
 #
 
-#!/bin/bash
 
 SERVICE=$1
 STATE=$(service $SERVICE status | awk '{print $2}')
