@@ -1,0 +1,17 @@
+#
+# Plugin to check the status of a service, using
+# 'service <service> status' command
+#
+
+#!/bin/bash
+
+SERVICE=$1
+STATE=$(service $SERVICE status | awk '{print $2}')
+
+if [ "$STATE" == "start/running," ]; then
+        echo "$SERVICE is running | state=1;;;0;1"
+        exit 0
+else
+	echo "$SERVICE is down | state=0;;;0;1"
+	exit 2
+fi
