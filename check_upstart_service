@@ -7,12 +7,19 @@
 
 
 SERVICE=$1
-STATE=$(service $SERVICE status | awk '{print $2}')
+STATE=$(service $SERVICE status | grep -w 'start\|is running' | wc -l)
 
-if [ "$STATE" == "start/running," ]; then
-        echo "$SERVICE is running | state=1;;;0;1"
+if [ "$STATE" == "1" ]; then
+        echo "$SERVICE is running"
         exit 0
-else
-	echo "$SERVICE is down | state=0;;;0;1"
-	exit 2
 fi
+
+STATE=$(service $SERVICE status | grep -w 'stop\|waiting\|not running' | wc -l)
+
+if [ "$STATE" == "1" ]; then
+        echo "$SERVICE is down"
+        exit 0
+fi
+
+echo "Service is in unknown state or is unrecognized"
+exit 2
