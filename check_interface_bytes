@@ -1,24 +1,30 @@
 #!/usr/bin/python
+
 #
 # The following script checks network traffic through an interface
 #
 from __future__ import division
 
-import argparse, sys
+import argparse
+import sys
 import subprocess
+
 
 def get_bytes(byte, interface):
     command = "cat /sys/class/net/%s/statistics/%s" % (interface, byte)
-    res_bytes = int(run_command(command)) 
+    res_bytes = int(run_command(command))
     return res_bytes
 
+
 def run_command(command):
-    r = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr = subprocess.PIPE)
+    r = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
     output, error = r.communicate()
     if output:
         return output
     print error
     sys.exit(4)
+
 
 def result(p):
     if int(p['gbps']) > 0:
@@ -29,19 +35,19 @@ def result(p):
         return "%.2f Kbps" % p['kbps']
     else:
         return "%s bps" % p['bps']
-                
-if __name__=='__main__':
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", required=True, type=float, help="Critical value")
     parser.add_argument("-w", required=True, type=float, help="Warning value")
     parser.add_argument("-i", required=True, help="Interface Name")
     args = parser.parse_args()
     critical_limit, warning_limit, interface = args.c, args.w, args.i
-    
+
     interval = 1
-   
-    tx,rx = {},{}
-    
+
+    tx, rx = {}, {}
+
     rx['bits1'] = get_bytes('rx_bytes', interface)*8
     tx['bits1'] = get_bytes('tx_bytes', interface)*8
     sleep_command = "sleep %s" % interval
@@ -49,20 +55,21 @@ if __name__=='__main__':
     rx['bits2'] = get_bytes('rx_bytes', interface)*8
     tx['bits2'] = get_bytes('tx_bytes', interface)*8
 
-    tx['bps'] = tx.get('bits2') - tx.get('bits1')  
-    rx['bps'] = rx.get('bits2') - rx.get('bits1')  
+    tx['bps'] = tx.get('bits2') - tx.get('bits1')
+    rx['bps'] = rx.get('bits2') - rx.get('bits1')
 
     tx['kbps'], rx['kbps'] = tx['bps']/10**3, rx['bps']/10**3
     tx['mbps'], rx['mbps'] = tx['bps']/10**6, rx['bps']/10**6
     tx['gbps'], rx['gbps'] = tx['bps']/10**9, rx['bps']/10**9
 
     output = "TX- %s, RX- %s\n" % (result(tx), result(rx))
-    output += "Crit- %sGbps, Warn- %sGbps\n" % (args.c, args.w)
-    
-    perfdata = "tx_speed=%s;;;; rx_speed=%s;;;; tx_bytes=%s;;;; rx_bytes=%s;;;;" % (tx['bps'], rx['bps'], tx['bits2'], rx['bits2'])
-    
+    output += "Crit- %sGbps, Warn- %sGbps" % (args.c, args.w)
+
+    perfdata = "tx_speed=%s;;;; rx_speed=%s;;;; tx_bytes=%s;;;; rx_bytes=%s;;;;" \
+                % (tx['bps'], rx['bps'], tx['bits2'], rx['bits2'])
+
     print output + " | " + perfdata
-    
+
     if tx['bps'] > critical_limit*(10**9) or rx['bps'] > critical_limit*(10**9):
         sys.exit(2)
     elif tx['bps'] > warning_limit*(10**9) or rx['bps'] > warning_limit*(10**9):
