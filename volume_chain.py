@@ -1,6 +1,10 @@
 #!/usr/bin/python
 
 #
+# Author: Ankit Agarwal (ankit.jsr167@gmail.com)
+# Created: 23 Nov, 2016
+# Last modified: 05 Jun, 2017
+#
 # The script displays a tree of dependencies between volumes and snapshots in
 # Openstack. A volume may have dependent snapshots, which further may have
 # dependent volumes and so on. This script would help in resolving the problem,
