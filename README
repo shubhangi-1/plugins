@@ -1,1 +1,4 @@
-This repository contains plugins related to Openstack and to perform system checks.
+This repository contains plugins related to:
+1. Openstack 
+2. System checks
+3. Trivial tasks that require automation
